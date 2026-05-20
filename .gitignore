@@ -1,0 +1,4 @@
+.firebase/
+.firebaserc
+firebase-auth.js
+firebase.json
