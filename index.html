@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvoicePro SaaS | Premium Invoice Management</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Auth Overlay -->
+    <div id="auth-overlay" class="modal-overlay" style="display: flex;">
+        <div class="card auth-card" style="max-width: 400px; width: 100%;">
+            <h2 id="auth-title">Welcome Back</h2>
+            <p id="auth-subtitle">Sign in to manage your invoices.</p>
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label>Email Address</label>
+                <input type="email" id="auth-email" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="auth-password" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary" id="btn-auth-action" style="width: 100%;">Sign In</button>
+            <p style="text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+                <span id="auth-switch-text">Don't have an account?</span>
+                <a href="#" id="auth-switch-link" style="color: var(--primary); font-weight: 600; text-decoration: none;">Sign Up</a>
+            </p>
+            <div id="auth-error" style="color: var(--danger); font-size: 0.8rem; margin-top: 1rem; text-align: center; display: none;"></div>
+        </div>
+    </div>
+
+    <div class="app-wrapper" id="main-content" style="filter: blur(5px); pointer-events: none;">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo"><i data-lucide="zap"></i></div>
+                <span class="brand-name">InvoicePro</span>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="switchTab('dashboard', this)">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchTab('editor', this)">
+                        <i data-lucide="plus-circle"></i>
+                        <span class="nav-text">Create Invoice</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchTab('history', this)">
+                        <i data-lucide="file-text"></i>
+                        <span class="nav-text">Invoice History</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchTab('customers', this)">
+                        <i data-lucide="users"></i>
+                        <span class="nav-text">Customers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="switchTab('settings', this)">
+                        <i data-lucide="settings"></i>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="user-mini">
+                    <div class="user-avatar" id="user-initials">JD</div>
+                    <div class="user-info">
+                        <div id="user-email" style="font-size: 0.8rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;">user@example.com</div>
+                        <button onclick="handleLogout()" style="background: none; border: none; color: var(--danger); font-size: 0.75rem; cursor: pointer; padding: 0; font-weight: 600;">Sign Out</button>
+                    </div>
+                </div>
+                <button class="btn btn-outline" style="width: 100%; margin-top: 1rem; padding: 0.5rem;" onclick="toggleDarkMode()">
+                    <i data-lucide="moon" id="theme-icon"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Tab: Dashboard -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="page-header">
+                    <h2 class="page-title">Dashboard</h2>
+                    <p class="page-subtitle">Welcome back! Here's what's happening with your invoices.</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Billed</div>
+                        <div class="stat-value" id="stat-total-billed">$0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Paid</div>
+                        <div class="stat-value" id="stat-paid" style="color: var(--success);">$0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pending</div>
+                        <div class="stat-value" id="stat-pending" style="color: var(--warning);">$0.00</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">Billed Amount (Monthly)</h3>
+                    <canvas id="billingChart" height="100"></canvas>
+                </div>
+            </div>
+
+            <!-- Tab: Editor -->
+            <div id="tab-editor" class="tab-content">
+                <div class="page-header">
+                    <h2 class="page-title">Create New Invoice</h2>
+                    <p class="page-subtitle">Fill in the details to generate a professional invoice.</p>
+                </div>
+
+                <div class="editor-grid">
+                    <div class="editor-pane">
+                        <div class="card">
+                            <h2 class="card-title">Business & Logo</h2>
+                            <div class="form-group">
+                                <label>Logo</label>
+                                <input type="file" accept="image/*" onchange="handleLogoUpload(this)">
+                            </div>
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" id="biz-name" placeholder="Your Business" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Address</label>
+                                <textarea id="biz-address" rows="2" oninput="updatePreview()"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h2 class="card-title">Client & Terms</h2>
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label>Quick Select Customer</label>
+                                    <select id="pick-customer" onchange="handleCustomerSelect(this.value)">
+                                        <option value="">-- Select Saved Customer --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label>Client Name</label>
+                                    <input type="text" id="client-name" oninput="updatePreview()">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label>Client Address</label>
+                                    <textarea id="client-address" rows="2" oninput="updatePreview()"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Invoice #</label>
+                                    <input type="text" id="inv-number" value="INV-001" oninput="updatePreview()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Due Date</label>
+                                    <input type="date" id="inv-date" oninput="updatePreview()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Currency</label>
+                                    <select id="inv-currency" onchange="updateCurrency(this.value)">
+                                        <option value="$">USD ($)</option>
+                                        <option value="€">EUR (€)</option>
+                                        <option value="£">GBP (£)</option>
+                                        <option value="₹">INR (₹)</option>
+                                        <option value="¥">JPY (¥)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select id="inv-status" onchange="updatePreview()">
+                                        <option value="pending">Pending</option>
+                                        <option value="paid">Paid</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tax Rate (%)</label>
+                                    <input type="number" id="tax-rate" value="10" oninput="updatePreview()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <h2 class="card-title">Items</h2>
+                            <div id="items-list"></div>
+                            <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;" onclick="addItem()">+ Add Item</button>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem;">
+                            <div style="display: flex; gap: 1rem;">
+                                <button class="btn btn-primary" onclick="saveInvoice()" style="flex: 1;">Save Invoice</button>
+                                <button class="btn btn-outline" onclick="window.print()">Print PDF</button>
+                            </div>
+                            <button class="btn btn-outline" onclick="newInvoice()" style="width: 100%;">Clear & Start New</button>
+                        </div>
+                    </div>
+
+                    <div class="preview-pane">
+                        <div class="invoice-preview" id="print-area">
+                            <!-- Premium Preview Content (similar to previous but optimized) -->
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 3rem;">
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <img id="prev-logo" style="max-width: 60px; max-height: 60px; display: none;">
+                                    <div>
+                                        <div id="prev-biz-name" style="font-size: 1.25rem; font-weight: 800; color: var(--primary);">Your Business</div>
+                                        <div id="prev-biz-address" style="font-size: 0.8rem; color: #64748b; white-space: pre-line;">Address</div>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div id="prev-status-badge" style="display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem;">Pending</div>
+                                    <div style="font-size: 2rem; font-weight: 700; line-height: 1;">INVOICE</div>
+                                    <div style="color: #64748b; font-size: 0.9rem;"># <span id="prev-inv-number">INV-001</span></div>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 3rem;">
+                                <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Bill To</div>
+                                <div id="prev-client-name" style="font-weight: 700; font-size: 1rem;">Client Name</div>
+                                <div id="prev-client-address" style="font-size: 0.85rem; color: #475569; white-space: pre-line;">Client Address</div>
+                            </div>
+
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid #f1f5f9;">
+                                        <th style="text-align: left; padding: 0.75rem 0; font-size: 0.75rem; color: #64748b;">Description</th>
+                                        <th style="text-align: right; padding: 0.75rem 0; font-size: 0.75rem; color: #64748b;">Qty</th>
+                                        <th style="text-align: right; padding: 0.75rem 0; font-size: 0.75rem; color: #64748b;">Price</th>
+                                        <th style="text-align: right; padding: 0.75rem 0; font-size: 0.75rem; color: #64748b;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prev-items-body"></tbody>
+                            </table>
+
+                            <div style="margin-left: auto; width: 200px;">
+                                <div style="display: flex; justify-content: space-between; padding: 0.25rem 0;"><span>Subtotal</span><span id="prev-subtotal">$0.00</span></div>
+                                <div style="display: flex; justify-content: space-between; padding: 0.25rem 0;"><span>Tax (<span id="prev-tax-rate">10</span>%)</span><span id="prev-tax-amount">$0.00</span></div>
+                                <div style="display: flex; justify-content: space-between; padding: 1rem 0; border-top: 2px solid #0f172a; margin-top: 0.5rem; font-weight: 800; font-size: 1.1rem; color: var(--primary);">
+                                    <span>Total Due</span><span id="prev-total">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Customers -->
+            <div id="tab-customers" class="tab-content">
+                <div class="page-header">
+                    <h2 class="page-title">Customers</h2>
+                    <p class="page-subtitle">Manage your client database for faster invoicing.</p>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">Add New Customer</h3>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Customer Name</label>
+                            <input type="text" id="new-cust-name" placeholder="John Doe">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Customer Address</label>
+                            <textarea id="new-cust-address" rows="2" placeholder="123 Client Lane..."></textarea>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveCustomer()">Save Customer</button>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">Your Customers</h3>
+                    <div id="customer-list" class="stats-grid" style="grid-template-columns: 1fr;">
+                        <!-- Customer items here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: History -->
+            <div id="tab-history" class="tab-content">
+                <div class="page-header">
+                    <h2 class="page-title">Invoice History</h2>
+                    <p class="page-subtitle">Search, filter, and manage all your invoices.</p>
+                </div>
+
+                <div class="search-container">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" class="search-input" id="history-search" placeholder="Search by client name or invoice number..." oninput="filterHistory()">
+                </div>
+
+                <div id="cloud-history-list" class="stats-grid" style="grid-template-columns: 1fr;">
+                    <!-- History items will be rendered here as cards -->
+                </div>
+            </div>
+
+            <!-- Tab: Settings -->
+            <div id="tab-settings" class="tab-content">
+                <div class="page-header">
+                    <h2 class="page-title">Settings</h2>
+                    <p class="page-subtitle">Manage your account and preferences.</p>
+                </div>
+                <div class="card">
+                    <h3>Account Preferences</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Your business profile and preferences are synced with your cloud account.</p>
+                    
+                    <div class="form-group" style="max-width: 300px;">
+                        <label>Default Currency</label>
+                        <select id="settings-currency" onchange="updateCurrency(this.value)">
+                            <option value="$">USD ($)</option>
+                            <option value="€">EUR (€)</option>
+                            <option value="£">GBP (£)</option>
+                            <option value="₹">INR (₹)</option>
+                            <option value="¥">JPY (¥)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-outline" style="margin-top: 1rem;" onclick="handleLogout()">Sign Out Securely</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script type="module" src="script.js"></script>
+    <script>
+        // Icons initialization
+        lucide.createIcons();
+    </script>
+</body>
+</html>
