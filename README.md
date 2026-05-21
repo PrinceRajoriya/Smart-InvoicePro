@@ -1,5 +1,12 @@
-[![Website](https://img.shields.io/badge/Project-Live-black?style=for-the-badge)](https://invoicepro-caf2e.web.app/)
+<div align="center">
 
+# 🚀 InvoicePro Live Demo
+
+<a href="https://invoicepro-caf2e.web.app/" target="_blank">
+  <img src="https://img.shields.io/badge/🌐%20Visit%20Live%20Project-InvoicePro-blue?style=for-the-badge&logo=google-chrome&logoColor=white" alt="Live Demo"/>
+</a>
+
+</div>
 # Smart InvoicePro (InvoicePro-Caf2e) 🚀
 
 InvoicePro-Caf2e is a full-featured invoice management web application designed to simplify invoice creation and customer management. Users can create, edit, save, and track invoices while accessing a powerful dashboard with analytics and invoice history.
