@@ -174,7 +174,7 @@ window.addItem = () => {
 window.removeItem = (id) => {
     items = items.filter(i => i.id !== id);
     renderItems();
-    updatePreview();
+    updatepreview();
 };
 
 window.updateItem = (id, field, value) => {
@@ -540,3 +540,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const saved = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', saved);
 });
+
+## this the logic file behind the invoice generation
+
